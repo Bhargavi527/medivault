@@ -1,0 +1,176 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { chatAPI } from '../api';
+import { toast } from 'react-toastify';
+
+const QUICK_ACTIONS = [
+  'Summarize my recent records',
+  'What medications am I on?',
+  'When was my last lab test?',
+  'Give me health tips based on my records'
+];
+
+export default function AIChatbot({ patientName }) {
+  const [messages, setMessages] = useState([
+    {
+      role: 'ai',
+      content: `Hello ${patientName || ''}! 👋 I'm your MediVault AI Health Assistant. I can help you:\n\n• Summarize your recent medical records\n• Explain diagnoses or medications\n• Answer general health questions\n• Highlight important health trends\n\nHow can I help you today?`
+    }
+  ]);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [summaryLoading, setSummaryLoading] = useState(false);
+  const messagesEndRef = useRef(null);
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const sendMessage = async (text) => {
+    const userMessage = text || input.trim();
+    if (!userMessage || loading) return;
+
+    setInput('');
+    const newMessages = [...messages, { role: 'user', content: userMessage }];
+    setMessages(newMessages);
+    setLoading(true);
+
+    try {
+      // Build conversation history for API (excluding greeting)
+      const history = newMessages.slice(1, -1).map(m => ({
+        role: m.role === 'ai' ? 'assistant' : 'user',
+        content: m.content
+      }));
+
+      const { data } = await chatAPI.sendMessage({
+        message: userMessage,
+        conversationHistory: history
+      });
+
+      setMessages(prev => [...prev, { role: 'ai', content: data.response }]);
+    } catch (err) {
+      const errorMsg = err.response?.data?.message || 'Sorry, I encountered an error. Please try again.';
+      setMessages(prev => [...prev, { role: 'ai', content: errorMsg }]);
+      toast.error('Chat error occurred');
+    } finally {
+      setLoading(false);
+      inputRef.current?.focus();
+    }
+  };
+
+  const loadAISummary = async () => {
+    setSummaryLoading(true);
+    try {
+      const { data } = await chatAPI.getSummary();
+      setMessages(prev => [...prev, 
+        { role: 'user', content: 'Please give me a summary of my recent medical records.' },
+        { role: 'ai', content: `📋 **Health Summary** (based on ${data.recordCount} records)\n\n${data.summary}` }
+      ]);
+    } catch (err) {
+      toast.error('Failed to load summary');
+    } finally {
+      setSummaryLoading(false);
+    }
+  };
+
+  const handleKeyDown = e => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      {/* Auto Summary Button */}
+      <button
+        onClick={loadAISummary}
+        disabled={summaryLoading}
+        className="btn"
+        style={{ 
+          background: 'linear-gradient(135deg, #667eea, #764ba2)', 
+          color: 'white', 
+          justifyContent: 'center',
+          padding: '10px 16px',
+          fontSize: '0.85rem'
+        }}
+      >
+        {summaryLoading ? '⏳ Generating Summary...' : '✨ Auto-Summarize Recent Records'}
+      </button>
+
+      {/* Quick Actions */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+        {QUICK_ACTIONS.map(action => (
+          <button
+            key={action}
+            onClick={() => sendMessage(action)}
+            disabled={loading}
+            style={{
+              padding: '5px 12px',
+              borderRadius: 20,
+              border: '1px solid #c7d2fe',
+              background: '#eef2ff',
+              color: '#4f46e5',
+              fontSize: '0.78rem',
+              cursor: 'pointer',
+              fontWeight: 500
+            }}
+          >
+            {action}
+          </button>
+        ))}
+      </div>
+
+      {/* Chat Messages */}
+      <div className="chat-messages" style={{ height: 380 }}>
+        {messages.map((msg, i) => (
+          <div key={i} className={`chat-msg ${msg.role}`}>
+            <div className={`chat-avatar ${msg.role}`}>
+              {msg.role === 'ai' ? '🤖' : patientName?.[0]?.toUpperCase() || 'U'}
+            </div>
+            <div className="chat-bubble">
+              {msg.content.split('\n').map((line, j) => (
+                <span key={j}>{line}{j < msg.content.split('\n').length - 1 && <br />}</span>
+              ))}
+            </div>
+          </div>
+        ))}
+        
+        {loading && (
+          <div className="chat-msg ai">
+            <div className="chat-avatar ai">🤖</div>
+            <div className="chat-bubble">
+              <div className="typing-indicator">
+                <div className="typing-dot"></div>
+                <div className="typing-dot"></div>
+                <div className="typing-dot"></div>
+              </div>
+            </div>
+          </div>
+        )}
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Input Area */}
+      <div className="chat-input-area">
+        <input
+          ref={inputRef}
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Ask me about your health records..."
+          disabled={loading}
+        />
+        <button onClick={() => sendMessage()} disabled={loading || !input.trim()}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+          </svg>
+        </button>
+      </div>
+
+      <p style={{ fontSize: '0.72rem', color: '#94a3b8', textAlign: 'center' }}>
+        ⚠️ AI responses are for informational purposes only. Always consult a qualified healthcare professional for medical decisions.
+      </p>
+    </div>
+  );
+}
