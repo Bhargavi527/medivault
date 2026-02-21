@@ -1,47 +1,148 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
+# 🏥 MediVault - Full Stack Medical Records Platform
 
-const userSchema = new mongoose.Schema({
-  name: { type: String, required: true, trim: true },
-  email: { type: String, required: true, unique: true, lowercase: true },
-  password: { type: String, required: true, minlength: 6 },
-  role: { type: String, enum: ['patient', 'doctor', 'admin'], default: 'patient' },
-  phone: { type: String, trim: true },
-  
-  // Doctor-specific fields
-  specialization: { type: String },
-  licenseNumber: { type: String },
-  hospital: { type: String },
-  experience: { type: Number },
-  isVerified: { type: Boolean, default: false },
-  
-  // Patient-specific fields
-  dateOfBirth: { type: Date },
-  bloodGroup: { type: String },
-  address: { type: String },
-  emergencyContact: {
-    name: String,
-    phone: String,
-    relation: String
-  },
-  
-  // QR Code
-  qrCode: { type: String },
-  qrToken: { type: String, unique: true, sparse: true },
+A complete health records management system with AI-powered health assistant, QR code patient profiles, and secure doctor/patient dashboards.
 
-  createdAt: { type: Date, default: Date.now }
-});
+## ✨ Features
 
-// Hash password before saving
-userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
-  this.password = await bcrypt.hash(this.password, 12);
-  next();
-});
+### Fixed in This Version
+- ✅ **Doctor Registration** - Complete form with specialization, license number, hospital, experience
+- ✅ **QR Code Generation** - Fixed server error, now generates properly with error handling
+- ✅ **AI Health Chatbot** - New feature in Patient Dashboard powered by Claude AI
 
-// Compare password method
-userSchema.methods.comparePassword = async function(candidatePassword) {
-  return await bcrypt.compare(candidatePassword, this.password);
-};
+### Core Features
+- 🔐 JWT Authentication for patients and doctors
+- 📋 Medical Records Management (prescriptions, lab reports, X-rays, scans, etc.)
+- 📁 File Upload support (PDF, images, documents up to 10MB)
+- 📱 QR Code patient profiles for instant sharing
+- 🤖 AI Chatbot with record summarization
+- 👨‍⚕️ Doctor Dashboard with patient management
+- 🏠 Patient Dashboard with health overview
 
-module.exports = mongoose.model('User', userSchema);
+---
+
+## 🚀 Setup Instructions
+
+### Prerequisites
+- Node.js 16+
+- MongoDB (local or MongoDB Atlas)
+- Anthropic API Key (for full AI features)
+
+### 1. Backend Setup
+
+```bash
+cd backend
+npm install
+
+# Edit .env file:
+MONGO_URI=mongodb://localhost:27017/medivault   # or your Atlas URI
+JWT_SECRET=your_secret_key_here
+ANTHROPIC_API_KEY=sk-ant-...  # Get from console.anthropic.com
+PORT=5000
+
+npm start
+# OR for development:
+npm run dev
+```
+
+### 2. Frontend Setup
+
+```bash
+cd frontend
+npm install
+npm start
+```
+
+App runs at: http://localhost:3000
+API runs at: http://localhost:5000
+
+---
+
+## 📁 Project Structure
+
+```
+medivault/
+├── backend/
+│   ├── models/
+│   │   ├── User.js          # Patient & Doctor model
+│   │   └── MedicalRecord.js # Medical records model
+│   ├── routes/
+│   │   ├── auth.js          # Register/Login (FIXED)
+│   │   ├── qr.js            # QR generation (FIXED)
+│   │   ├── records.js       # CRUD for medical records
+│   │   ├── chat.js          # AI Chatbot (NEW)
+│   │   ├── patients.js      # Patient management
+│   │   └── doctors.js       # Doctor management
+│   ├── middleware/
+│   │   └── auth.js          # JWT auth middleware
+│   ├── uploads/             # Uploaded files directory
+│   ├── server.js            # Express server
+│   └── .env                 # Configuration
+│
+└── frontend/
+    └── src/
+        ├── api/             # Axios API calls
+        ├── context/         # Auth context
+        ├── components/
+        │   ├── AIChatbot.js     # AI health assistant (NEW)
+        │   ├── QRCodeDisplay.js # QR code component (FIXED)
+        │   └── AddRecordModal.js
+        └── pages/
+            ├── Login.js
+            ├── Register.js      # Doctor registration (FIXED)
+            ├── PatientDashboard.js
+            ├── DoctorDashboard.js
+            └── QRPage.js
+```
+
+---
+
+## 🤖 AI Health Assistant Setup
+
+1. Get your API key from https://console.anthropic.com
+2. Add to backend `.env`:
+   ```
+   ANTHROPIC_API_KEY=sk-ant-api03-...
+   ```
+3. The chatbot will automatically load your recent 5 records as context
+
+**Without API key**: The chatbot runs in demo mode with pre-defined responses.
+
+---
+
+## 🐛 Bugs Fixed
+
+### 1. Doctor Registration Server Error
+**Problem**: Missing validation and incorrect field handling for doctor-specific fields  
+**Fix**: Added proper validation for `specialization` and `licenseNumber`, proper handling of all doctor fields, better error messages
+
+### 2. QR Code Generation Server Error
+**Problem**: Missing `qrToken` field on some users, no error handling  
+**Fix**: Auto-generates `qrToken` if missing, proper error handling, returns detailed error messages
+
+---
+
+## 🔗 API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/auth/register` | Register patient/doctor |
+| POST | `/api/auth/login` | Login |
+| GET | `/api/auth/me` | Get current user |
+| GET | `/api/qr/generate` | Generate QR code |
+| GET | `/api/qr/scan/:token` | Scan QR code |
+| GET | `/api/records` | Get records |
+| POST | `/api/records` | Add record (with file) |
+| DELETE | `/api/records/:id` | Delete record |
+| POST | `/api/chat` | AI chat message |
+| GET | `/api/chat/summary` | Auto-summarize records |
+
+---
+
+## 🌐 Using MongoDB Atlas (Production)
+
+1. Create account at https://cloud.mongodb.com
+2. Create a cluster and get connection string
+3. Update `.env`:
+   ```
+   MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/medivault
+   ```
