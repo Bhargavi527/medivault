@@ -1,50 +1,147 @@
-# 🏥 MediVault - Full Stack Medical Records Platform
+# 🏥 MediVault — AI-Powered Medical Records Platform
 
-A complete health records management system with AI-powered health assistant, QR code patient profiles, and secure doctor/patient dashboards.
+![MediVault](https://img.shields.io/badge/MediVault-Healthcare-blue?style=for-the-badge)
+![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react)
+![Node.js](https://img.shields.io/badge/Node.js-Express-339933?style=for-the-badge&logo=node.js)
+![MongoDB](https://img.shields.io/badge/MongoDB-Database-47A248?style=for-the-badge&logo=mongodb)
+![Claude AI](https://img.shields.io/badge/Claude-AI%20Powered-orange?style=for-the-badge)
 
-## ✨ Features
-
-### Fixed in This Version
-- ✅ **Doctor Registration** - Complete form with specialization, license number, hospital, experience
-- ✅ **QR Code Generation** - Fixed server error, now generates properly with error handling
-- ✅ **AI Health Chatbot** - New feature in Patient Dashboard powered by Claude AI
-
-### Core Features
-- 🔐 JWT Authentication for patients and doctors
-- 📋 Medical Records Management (prescriptions, lab reports, X-rays, scans, etc.)
-- 📁 File Upload support (PDF, images, documents up to 10MB)
-- 📱 QR Code patient profiles for instant sharing
-- 🤖 AI Chatbot with record summarization
-- 👨‍⚕️ Doctor Dashboard with patient management
-- 🏠 Patient Dashboard with health overview
+> A full-stack medical records management platform where patients securely store health records, doctors manage patient data, and an AI assistant powered by Claude summarizes medical history in real time.
 
 ---
 
-## 🚀 Setup Instructions
+## 📸 Features Overview
+
+| Feature | Description |
+|---|---|
+| 🔐 Auth System | Separate login & registration for Patients and Doctors |
+| 📋 Medical Records | Upload and manage prescriptions, lab reports, X-rays, scans and more |
+| 🤖 AI Health Assistant | Chat with Claude AI to get summaries of your recent medical records |
+| 📱 QR Code Profiles | Generate a personal QR code — doctors scan it to instantly view your records |
+| 📁 File Upload | Attach PDFs, images, and documents to records (up to 10MB) |
+| 👨‍⚕️ Doctor Dashboard | Doctors can manage patients, view records, and scan patient QR codes |
+| 🏠 Patient Dashboard | Patients see health stats, records, AI chat, and QR code in one place |
+
+---
+
+## 🧠 How It Works
+
+### For Patients
+
+1. **Register** as a Patient with your basic health info (blood group, DOB, etc.)
+2. **Upload Medical Records** — add prescriptions, lab reports, X-rays with file attachments
+3. **Chat with AI** — the AI Health Assistant reads your last 5 records and gives you a smart health summary
+4. **Generate QR Code** — get a personal QR code to share with any doctor instantly
+
+### For Doctors
+
+1. **Register** as a Doctor with your specialization and license number
+2. **View Patient List** — see all registered patients on the platform
+3. **Scan QR Code** — paste a patient's QR token to instantly pull up their medical profile and records
+4. **Add Records** — create medical records directly for patients after a consultation
+
+### AI Health Assistant
+
+The AI chatbot (powered by **Claude by Anthropic**) automatically loads the patient's 5 most recent records as context and can:
+
+- Auto-summarize recent health records with one click
+- Answer questions like *"What medications am I on?"* or *"When was my last lab test?"*
+- Explain diagnoses and medical terminology in simple language
+- Highlight health trends from uploaded records
+
+> ⚠️ The AI assistant is for informational purposes only and does not replace professional medical advice.
+
+---
+
+## 🗂️ Project Structure
+
+```
+medivault/
+├── backend/
+│   ├── models/
+│   │   ├── User.js              # Patient & Doctor schema
+│   │   └── MedicalRecord.js     # Medical records schema
+│   ├── routes/
+│   │   ├── auth.js              # Register & Login
+│   │   ├── records.js           # Add, view, delete records
+│   │   ├── qr.js                # QR code generation & scanning
+│   │   ├── chat.js              # AI chatbot & auto-summary
+│   │   ├── patients.js          # Patient management
+│   │   └── doctors.js           # Doctor management
+│   ├── middleware/
+│   │   └── auth.js              # JWT authentication middleware
+│   ├── uploads/                 # Uploaded files stored here
+│   ├── server.js                # Main Express server
+│   └── .env                     # Environment variables
+│
+└── frontend/
+    └── src/
+        ├── api/
+        │   └── index.js         # All API calls (Axios)
+        ├── context/
+        │   └── AuthContext.js   # Global auth state
+        ├── components/
+        │   ├── AIChatbot.js     # AI Health Assistant chat UI
+        │   ├── QRCodeDisplay.js # QR code generator component
+        │   └── AddRecordModal.js# Add new medical record form
+        └── pages/
+            ├── Login.js         # Login page
+            ├── Register.js      # Patient & Doctor registration
+            ├── PatientDashboard.js  # Full patient portal
+            ├── DoctorDashboard.js   # Doctor portal
+            └── QRPage.js        # Public QR scan result page
+```
+
+---
+
+## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 16+
-- MongoDB (local or MongoDB Atlas)
-- Anthropic API Key (for full AI features)
 
-### 1. Backend Setup
+- Node.js v16 or higher
+- MongoDB (local) or MongoDB Atlas account
+- Anthropic API Key — get one free at [console.anthropic.com](https://console.anthropic.com)
+
+---
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/YOUR_USERNAME/medivault.git
+cd medivault
+```
+
+---
+
+### 2. Backend Setup
 
 ```bash
 cd backend
 npm install
+```
 
-# Edit .env file:
-MONGO_URI=mongodb://localhost:27017/medivault   # or your Atlas URI
-JWT_SECRET=your_secret_key_here
-ANTHROPIC_API_KEY=sk-ant-...  # Get from console.anthropic.com
+Edit the `.env` file:
+
+```env
 PORT=5000
+MONGO_URI=mongodb://localhost:27017/medivault
+JWT_SECRET=your_secret_key_here
+ANTHROPIC_API_KEY=sk-ant-api03-xxxxxxxxx
+```
 
+Start the backend:
+
+```bash
 npm start
-# OR for development:
+# or for development with auto-restart:
 npm run dev
 ```
 
-### 2. Frontend Setup
+Backend runs at: `http://localhost:5000`
+
+---
+
+### 3. Frontend Setup
 
 ```bash
 cd frontend
@@ -52,97 +149,107 @@ npm install
 npm start
 ```
 
-App runs at: http://localhost:3000
-API runs at: http://localhost:5000
-
----
-
-## 📁 Project Structure
-
-```
-medivault/
-├── backend/
-│   ├── models/
-│   │   ├── User.js          # Patient & Doctor model
-│   │   └── MedicalRecord.js # Medical records model
-│   ├── routes/
-│   │   ├── auth.js          # Register/Login (FIXED)
-│   │   ├── qr.js            # QR generation (FIXED)
-│   │   ├── records.js       # CRUD for medical records
-│   │   ├── chat.js          # AI Chatbot (NEW)
-│   │   ├── patients.js      # Patient management
-│   │   └── doctors.js       # Doctor management
-│   ├── middleware/
-│   │   └── auth.js          # JWT auth middleware
-│   ├── uploads/             # Uploaded files directory
-│   ├── server.js            # Express server
-│   └── .env                 # Configuration
-│
-└── frontend/
-    └── src/
-        ├── api/             # Axios API calls
-        ├── context/         # Auth context
-        ├── components/
-        │   ├── AIChatbot.js     # AI health assistant (NEW)
-        │   ├── QRCodeDisplay.js # QR code component (FIXED)
-        │   └── AddRecordModal.js
-        └── pages/
-            ├── Login.js
-            ├── Register.js      # Doctor registration (FIXED)
-            ├── PatientDashboard.js
-            ├── DoctorDashboard.js
-            └── QRPage.js
-```
-
----
-
-## 🤖 AI Health Assistant Setup
-
-1. Get your API key from https://console.anthropic.com
-2. Add to backend `.env`:
-   ```
-   ANTHROPIC_API_KEY=sk-ant-api03-...
-   ```
-3. The chatbot will automatically load your recent 5 records as context
-
-**Without API key**: The chatbot runs in demo mode with pre-defined responses.
-
----
-
-## 🐛 Bugs Fixed
-
-### 1. Doctor Registration Server Error
-**Problem**: Missing validation and incorrect field handling for doctor-specific fields  
-**Fix**: Added proper validation for `specialization` and `licenseNumber`, proper handling of all doctor fields, better error messages
-
-### 2. QR Code Generation Server Error
-**Problem**: Missing `qrToken` field on some users, no error handling  
-**Fix**: Auto-generates `qrToken` if missing, proper error handling, returns detailed error messages
+Frontend runs at: `http://localhost:3000`
 
 ---
 
 ## 🔗 API Endpoints
 
+### Auth
 | Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/auth/register` | Register patient/doctor |
+|---|---|---|
+| POST | `/api/auth/register` | Register as patient or doctor |
 | POST | `/api/auth/login` | Login |
-| GET | `/api/auth/me` | Get current user |
-| GET | `/api/qr/generate` | Generate QR code |
-| GET | `/api/qr/scan/:token` | Scan QR code |
-| GET | `/api/records` | Get records |
-| POST | `/api/records` | Add record (with file) |
-| DELETE | `/api/records/:id` | Delete record |
-| POST | `/api/chat` | AI chat message |
-| GET | `/api/chat/summary` | Auto-summarize records |
+| GET | `/api/auth/me` | Get logged-in user info |
+
+### Records
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/records` | Get all records for current user |
+| POST | `/api/records` | Add new medical record (with file) |
+| DELETE | `/api/records/:id` | Delete a record |
+
+### QR Code
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/qr/generate` | Generate QR code for patient |
+| GET | `/api/qr/scan/:token` | Get patient data by QR token |
+
+### AI Chat
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/chat` | Send message to AI assistant |
+| GET | `/api/chat/summary` | Auto-generate health summary from records |
 
 ---
 
-## 🌐 Using MongoDB Atlas (Production)
+## 🛠️ Tech Stack
 
-1. Create account at https://cloud.mongodb.com
-2. Create a cluster and get connection string
-3. Update `.env`:
-   ```
-   MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/medivault
-   ```
+### Backend
+- **Node.js** + **Express.js** — REST API server
+- **MongoDB** + **Mongoose** — Database and ODM
+- **JWT** — Secure authentication tokens
+- **bcryptjs** — Password hashing
+- **Multer** — File upload handling
+- **qrcode** — QR code generation
+
+### Frontend
+- **React 18** — UI framework
+- **React Router v6** — Client-side routing
+- **Axios** — HTTP requests
+- **React Toastify** — Notifications
+- **Context API** — Global state management
+
+### AI
+- **Anthropic Claude API** — Powers the AI Health Assistant and record summarization
+
+---
+
+## 🌐 Deployment
+
+### Backend (Render / Railway)
+1. Push code to GitHub
+2. Connect repo to [Render](https://render.com) or [Railway](https://railway.app)
+3. Set environment variables in the dashboard:
+   - `MONGO_URI`
+   - `JWT_SECRET`
+   - `ANTHROPIC_API_KEY`
+
+### Frontend (Vercel / Netlify)
+1. Connect the `frontend/` folder to [Vercel](https://vercel.com)
+2. Set environment variable:
+   - `REACT_APP_API_URL=https://your-backend-url.com/api`
+
+---
+
+## 🔒 Security Notes
+
+- Passwords are hashed using **bcryptjs** before storing
+- All protected routes require a valid **JWT token**
+- `.env` file is excluded from git — never commit API keys
+- File uploads are validated for type and size (max 10MB)
+- QR tokens are unique UUIDs per patient
+
+---
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch: `git checkout -b feature/my-feature`
+3. Commit your changes: `git commit -m "Add my feature"`
+4. Push to the branch: `git push origin feature/my-feature`
+5. Open a Pull Request
+
+---
+
+## 📄 License
+
+This project is open source and available under the [MIT License](LICENSE).
+
+---
+
+## 👨‍💻 Author
+
+Built with ❤️ using React, Node.js, MongoDB, and Claude AI.
+
+> 💡 **Tip:** Add your Anthropic API key to unlock the full AI Health Assistant. Without it, the chatbot runs in demo mode with pre-defined responses.
